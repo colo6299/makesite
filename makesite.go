@@ -1,22 +1,30 @@
 package main
 
 import (
+	"flag"
 	"io/ioutil"
 	"os"
+	"strings"
 	"text/template"
 )
 
-type PageData struct {
+type pageData struct {
 	Content string
 }
 
 func main() {
-	var textData string = readFile()
-	renderTemplate("template.tmpl", textData)
+
+	fileFlag := flag.String("file", "first-post.txt", "used to define input text")
+	flag.Parse()
+	var fileName string = *fileFlag
+	fileName = fileName[0:strings.Index(*fileFlag, ".")] + ".html"
+
+	var textData string = readFile(*fileFlag)
+	renderTemplate("template.tmpl", textData, fileName)
 }
 
-func readFile() string {
-	fileContents, err := ioutil.ReadFile("first-post.txt")
+func readFile(inPath string) string {
+	fileContents, err := ioutil.ReadFile(inPath)
 	if err != nil {
 		panic(err)
 	}
@@ -24,12 +32,12 @@ func readFile() string {
 	return string(fileContents)
 }
 
-func renderTemplate(tPath, textData string) {
+func renderTemplate(tPath, textData, fileName string) {
 	paths := []string{
 		tPath,
 	}
 
-	f, err := os.Create("first-post.html")
+	f, err := os.Create(fileName)
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +47,7 @@ func renderTemplate(tPath, textData string) {
 		panic(err)
 	}
 
-	err = t.Execute(f, PageData{textData})
+	err = t.Execute(f, pageData{textData})
 	if err != nil {
 		panic(err)
 	}
