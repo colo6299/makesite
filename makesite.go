@@ -10,17 +10,39 @@ import (
 
 type pageData struct {
 	Content string
-	Title string
+	Title   string
 }
 
 func main() {
 
 	fileFlag := flag.String("file", "first-post.txt", "used to define input text")
+	dirFlag := flag.String("dir", "none", "if spedified, generates for all .txt in the directory")
 	flag.Parse()
-	var fileName string = *fileFlag
-	fileName = fileName[0:strings.Index(*fileFlag, ".")] + ".html"
+	if *dirFlag == "none" {
+		runForFile(*fileFlag, "text_directory/")
+	} else {
+		var directory string = *dirFlag
+		if directory[len(directory)-1] != "/"[0] {
+			directory += "/"
+		}
 
-	var textData string = readFile(*fileFlag)
+		files, err := ioutil.ReadDir(directory)
+		if err != nil {
+			panic(err)
+		}
+		for _, file := range files {
+			if file.IsDir() == false {
+				runForFile(file.Name(), directory)
+			}
+		}
+	}
+}
+
+func runForFile(fileFlag, directory string) {
+	var fileName string = fileFlag
+	fileName = fileName[0:strings.Index(fileFlag, ".")] + ".html"
+
+	var textData string = readFile(directory + fileFlag)
 	renderTemplate("template.tmpl", textData, fileName)
 }
 
