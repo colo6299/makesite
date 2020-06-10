@@ -10,6 +10,7 @@ import (
 
 type pageData struct {
 	Content string
+	Title string
 }
 
 func main() {
@@ -47,7 +48,9 @@ func renderTemplate(tPath, textData, fileName string) {
 		panic(err)
 	}
 
-	err = t.Execute(f, pageData{textData})
+	rawName := fileName[0:strings.Index(fileName, ".")]
+
+	err = t.Execute(f, pageData{textData, rawName})
 	if err != nil {
 		panic(err)
 	}
